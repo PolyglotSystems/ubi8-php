@@ -7,14 +7,7 @@ ARG SOURCE_NAME
 USER root
 
 # Environmental Variables
-ENV COPY_ENV_FILE=true \
-    GENERATE_ENV_KEY=true \
-    GENERATE_SQLITE_DB=true \
-    MIGRATE_DATABASE=true \
-    SEED_DATABASE=true \
-    COPY_ENV_FILE_FROM_CONFIGMAP=false \
-    GENERATE_SHOW_NEW_ENV_KEY=false \
-    PATH=/opt/app-root/bin/:$PATH
+ENV PATH=/opt/app-root/bin/:$PATH
 
 # Update image
 RUN yum update -y --disablerepo=* --enablerepo=ubi-8-appstream --enablerepo=ubi-8-baseos \
@@ -32,15 +25,13 @@ RUN yum install -y --disablerepo=* --enablerepo=ubi-8-appstream --enablerepo=ubi
 # Clear Image
 RUN rm -rf /var/www/html \
  && mkdir -p /var/www/html \
- && mkdir -p /var/log/php-fpm \
  && mkdir -p /opt/app-root/bin \
- && mkdir -p /var/{log,run}/nginx \
+ && mkdir -p /var/{log,run}/{nginx,php-fpm} \
  && touch /var/log/nginx/error.log \
  && chown -R 1001:1001 /opt/app-root \
  && chown -R 1001:1001 /var/www/ \
  && chown -R 1001:1001 /var/{log,run}/nginx/ \
- && chmod -R 777 /var/log/php-fpm \
- && chmod -R 777 /var/{log,run}/nginx/ \
+ && chmod -R 777 /var/{log,run}/{nginx,php-fpm}/ \
  && chmod -R 777 /var/www/
 
 # Copy files
@@ -52,4 +43,4 @@ USER 1001
 
 WORKDIR "/var/www/html"
 
-CMD [ "/usr/sbin/nginx" ]
+CMD [ "sh", "/start.sh" ]

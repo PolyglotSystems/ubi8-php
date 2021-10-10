@@ -18,7 +18,22 @@ docker pull quay.io/polyglotsystems/ubi8-php:latest
 
 - `main`, `:latest`, `:7.4`, `:7.4.6`, `:v7.4.6`
 
-# Licenses
+
+## Using this Container as a Base
+
+```docker
+FROM quay.io/polyglotsystems/ubi8-php:latest
+
+COPY ./my-php-app /var/www/html
+```
+
+## Using this Container via Podman
+
+```bash
+sudo podman run --rm -p 8080:8080 -v ./my-php-app:/var/www/html quay.io/polyglotsystems/ubi8-php:latest
+```
+
+## Licenses
 
 - The Red Hat Universal Base Image is covered by [its own EULA](https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf)
 - PHP is covered by [its own license](https://www.php.net/license/) as well
