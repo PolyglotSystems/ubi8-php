@@ -1,0 +1,86 @@
+name: Build PHP UBI Container
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+    branches:
+      - main
+    tags:
+      - v*
+jobs:
+  # Build the container
+  build-container:
+    name: Build Container
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v2.3.4
+
+    - name: Git Build Info
+      id: git_build_info
+      run: |
+        echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
+        echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
+        echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+
+    - name: Set version of PHP
+      id: php_version
+      run: |
+        IS_TAGGED_VERSION="false"
+        PHP_VERSION="8.0"
+        SOURCE_NAME="${{ steps.git_build_info.outputs.SOURCE_NAME }}"
+        IFS='.' read -r -a verArr <<< "$SOURCE_NAME"
+        [ "${verArr[0]:0:1}" = "v" ] && export IS_TAGGED_VERSION="true"
+        [ "${verArr[0]:0:1}" = "v" ] && export PHP_VERSION="${verArr[0]:1}.${verArr[1]}"
+        echo "IS_TAGGED_VERSION: ${IS_TAGGED_VERSION}"
+        echo "PHP_VERSION: ${PHP_VERSION}"
+        echo ::set-output name=IS_TAGGED_VERSION::$IS_TAGGED_VERSION
+        echo ::set-output name=PHP_VERSION::$PHP_VERSION
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          quay.io/polyglotsystems/ubi8-php
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=ref,event=branch
+          type=ref,event=tag
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha
+
+    - name: Login to Quay
+      uses: docker/login-action@v1 
+      with:
+        registry: quay.io
+        username: "${{ secrets.REGISTRY_USERNAME }}"
+        password: "${{ secrets.REGISTRY_TOKEN }}"
+
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        file: Containerfile
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          PHP_VERSION=${{ steps.php_version.outputs.PHP_VERSION }}
+          SOURCE_NAME=${{ steps.git_build_info.outputs.SOURCE_NAME }}
+
+    - name: Create a new Release with the newly built container
+      if: "contains(steps.php_version.outputs.IS_TAGGED_VERSION, 'true')"
+      uses: ncipollo/release-action@v1
+      with:
+        token: ${{ secrets.GHUB_TOKEN }}
