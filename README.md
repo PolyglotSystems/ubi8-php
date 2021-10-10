@@ -18,7 +18,6 @@ docker pull quay.io/polyglotsystems/ubi8-php:latest
 
 - `main`, `:latest`, `:7.4`, `:7.4.6`, `:v7.4.6`
 
-
 ## Using this Container as a Base
 
 ```docker

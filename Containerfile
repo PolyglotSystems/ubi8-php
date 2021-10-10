@@ -30,7 +30,7 @@ RUN rm -rf /var/www/html \
  && touch /var/log/nginx/error.log \
  && chown -R 1001:1001 /opt/app-root \
  && chown -R 1001:1001 /var/www/ \
- && chown -R 1001:1001 /var/{log,run}/nginx/ \
+ && chown -R 1001:1001 /var/{log,run}/{nginx,php-fpm}/ \
  && chmod -R 777 /var/{log,run}/{nginx,php-fpm}/ \
  && chmod -R 777 /var/www/
 
