@@ -30,7 +30,7 @@ COPY ./my-php-app /var/www/html
 ## Using this Container via Podman
 
 ```bash
-sudo podman run --rm -p 8080:8080 -v ./my-php-app:/var/www/html quay.io/polyglotsystems/ubi8-php:latest
+sudo podman run --name ubi8-php --rm -p 8080:8080 -v ./my-php-app:/var/www/html quay.io/polyglotsystems/ubi8-php:latest
 ```
 
 ## Licenses

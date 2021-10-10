@@ -25,7 +25,7 @@ RUN yum install -y --disablerepo=* --enablerepo=ubi-8-appstream --enablerepo=ubi
 # Clear Image
 RUN rm -rf /var/www/html \
  && mkdir -p /var/www/html \
- && mkdir -p /opt/app-root/bin \
+ && mkdir -p /opt/app-root/{bin,src} \
  && mkdir -p /var/{log,run}/{nginx,php-fpm} \
  && touch /var/log/nginx/error.log \
  && chown -R 1001:1001 /opt/app-root \
